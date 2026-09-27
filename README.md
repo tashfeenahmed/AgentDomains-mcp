@@ -92,6 +92,8 @@ The API key is never logged, printed, or included in any tool output.
 | `remove_proxy` | `DELETE /v1/subdomains/{label}/proxy` | Stop proxying. |
 | `delegate_nameservers` | `PUT /v1/subdomains/{label}/ns` | Delegate the name to your own nameservers. |
 | `delete_account` | `DELETE /v1/account[?force=true]` | **Destructive** — close the account and kill its key; refuses while names are held unless `force`. |
+| `upgrade_to_pro` | `POST /v1/billing/checkout` | A Stripe checkout link for Pro (100 names, $5/month or $48/year). Charges nothing; a human opens the link and pays. |
+| `manage_billing` | `POST /v1/billing/portal` | A Stripe billing-portal link for a Pro account (card, invoices, interval, cancel). |
 
 Every label-scoped tool takes an optional `domain` (`makes.fyi`, the default, or
 `agentdomains.co`).

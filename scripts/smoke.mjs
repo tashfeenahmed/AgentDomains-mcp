@@ -15,6 +15,7 @@ const EXPECTED = [
   "list_domains", "get_domain", "delete_domain", "add_dns_record", "delete_record",
   "add_acme_challenge", "set_forward", "remove_forward", "set_proxy",
   "remove_proxy", "delegate_nameservers", "delete_account",
+  "upgrade_to_pro", "manage_billing",
 ];
 
 const child = spawn(process.execPath, [join(root, "dist", "index.js")], {
