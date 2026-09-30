@@ -1,0 +1,58 @@
+# INSTALL: move this file to .github/workflows/publish-mcp-registry.yml
+# (adding a workflow file needs a token with the `workflow` scope).
+#
+# Publishes this server's metadata to the official MCP Registry
+# (registry.modelcontextprotocol.io), the canonical index that PulseMCP,
+# Smithery, Glama and other agent-tool directories ingest.
+#
+# Flow: push a tag whose version matches the npm-published package
+# (`git tag vX.Y.Z && git push origin vX.Y.Z`, the same tag that cuts the
+# npm release). The job authenticates to the registry via GitHub OIDC —
+# proving the `io.github.tashfeenahmed` namespace — and uploads server.json.
+# No secrets needed. See docs: modelcontextprotocol/registry
+# (docs/modelcontextprotocol-io/github-actions.mdx).
+name: Publish to MCP Registry
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  id-token: write # required for GitHub OIDC auth to the MCP Registry
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check server.json matches the release
+        # Keep server.json and package.json in lockstep: bump both in the
+        # release commit. Failing here is better than publishing metadata
+        # for an npm version that does not exist.
+        run: |
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json"));
+            const srv = JSON.parse(fs.readFileSync("server.json"));
+            const tag = process.env.GITHUB_REF_NAME.replace(/^v/, "");
+            const problems = [];
+            if (pkg.version !== tag) problems.push(`package.json ${pkg.version} != tag ${tag}`);
+            if (srv.version !== tag) problems.push(`server.json ${srv.version} != tag ${tag}`);
+            for (const p of srv.packages || [])
+              if (p.version !== tag) problems.push(`server.json package ${p.identifier} pinned to ${p.version}, expected ${tag}`);
+            if (srv.name !== pkg.mcpName) problems.push(`server.json name ${srv.name} != package.json mcpName ${pkg.mcpName}`);
+            if (problems.length) { console.error(problems.join("\n")); process.exit(1); }
+          '
+
+      - name: Install mcp-publisher
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate to MCP Registry
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish server to MCP Registry
+        run: ./mcp-publisher publish

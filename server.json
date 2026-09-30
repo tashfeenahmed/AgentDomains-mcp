@@ -1,0 +1,45 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.tashfeenahmed/agentdomains-mcp",
+  "title": "AgentDomains",
+  "description": "Free domains under makes.fyi or agentdomains.co for the sites and APIs AI agents build.",
+  "version": "0.1.3",
+  "repository": {
+    "url": "https://github.com/tashfeenahmed/AgentDomains-mcp",
+    "source": "github"
+  },
+  "website": "https://agentdomains.co",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.agentdomains.co",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer <your AgentDomains API key (adom_…)>. Only needed for tools that manage an account; check_availability works without it.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "agentdomains-mcp",
+      "version": "0.1.3",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "AGENTDOMAINS_API_KEY",
+          "description": "Your AgentDomains API key (adom_…). Only needed for calls that manage an account; check_availability works without one.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
