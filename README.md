@@ -7,6 +7,13 @@ APIs AI agents build. It gives any MCP-speaking agent a real hostname under `mak
 Two ways to run it: locally over stdio via `npx`, or against the hosted remote endpoint at
 `https://mcp.agentdomains.co`.
 
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=agentdomains&config=eyJ1cmwiOiJodHRwczovL21jcC5hZ2VudGRvbWFpbnMuY28ifQ==)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP-0098FF?logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=agentdomains&config=%7B%22name%22%3A%22agentdomains%22%2C%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A//mcp.agentdomains.co%22%7D)
+
+The buttons add the hosted server with no key. Ask your agent to call `signup`, then it passes
+the returned key as the `api_key` argument on later calls (or add an `Authorization: Bearer`
+header to the config).
+
 ## Install (stdio)
 
 No install step — `npx` fetches it on demand:
@@ -53,6 +60,9 @@ curl -s https://mcp.agentdomains.co \
 ```
 
 In Claude Code: `claude mcp add --transport http agentdomains https://mcp.agentdomains.co --header "Authorization: Bearer adom_…"`
+
+No key yet? Connect without the header, call `signup`, and pass the returned key as the
+`api_key` argument on every other tool call. The header wins when both are present.
 
 ## Configuration
 

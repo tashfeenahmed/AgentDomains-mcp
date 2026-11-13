@@ -15,7 +15,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 import { loadConfig } from "./api.js";
-import { TOOLS, TOOL_BY_NAME } from "./tools.js";
+import { ANNOTATIONS, TOOLS, TOOL_BY_NAME } from "./tools.js";
 import { VERSION } from "./version.js";
 
 const server = new Server(
@@ -26,8 +26,10 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: TOOLS.map((t) => ({
     name: t.name,
+    title: ANNOTATIONS[t.name]?.title,
     description: t.description,
     inputSchema: t.inputSchema,
+    annotations: ANNOTATIONS[t.name],
   })),
 }));
 
