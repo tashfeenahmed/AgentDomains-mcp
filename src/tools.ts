@@ -32,6 +32,38 @@ const labelProp = {
   },
 } as const;
 
+// MCP tool annotations: a human title plus hints that tell a client which
+// tools only read, which can remove or replace something, and which are safe
+// to repeat. Directories (and Claude's connector review) require them.
+export const ANNOTATIONS: Record<string, {
+  title: string;
+  readOnlyHint: boolean;
+  destructiveHint: boolean;
+  idempotentHint: boolean;
+  openWorldHint: boolean;
+}> = {
+  check_availability: { title: "Check if a name is free", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  signup: { title: "Create an account", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  whoami: { title: "Show my account", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  attach_email: { title: "Attach an email", readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  claim_domain: { title: "Claim a domain", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  list_domains: { title: "List my domains", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  get_visits: { title: "Show visitor stats", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  get_domain: { title: "Show one domain", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  delete_domain: { title: "Delete a domain", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  add_dns_record: { title: "Add a DNS record", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  delete_record: { title: "Delete a DNS record", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  add_acme_challenge: { title: "Add an ACME challenge", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  set_forward: { title: "Forward a domain to a URL", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  remove_forward: { title: "Remove a forward", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  set_proxy: { title: "Proxy a domain to an app", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  remove_proxy: { title: "Remove a proxy", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  delegate_nameservers: { title: "Delegate to my nameservers", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  delete_account: { title: "Delete my account", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  upgrade_to_pro: { title: "Get a Pro checkout link", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  manage_billing: { title: "Get a billing portal link", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+};
+
 export const TOOLS: ToolDef[] = [
   {
     name: "check_availability",
@@ -159,6 +191,27 @@ export const TOOLS: ToolDef[] = [
       required: ["label"],
     },
     call: (cfg, a) => request(cfg, "GET", resourcePath(a.label, "", a.domain)),
+  },
+  {
+    name: "get_visits",
+    description:
+      "Visitor stats for a name that has a forward or proxy (plain DNS records are not seen). Pro accounts get " +
+      "daily requests and page views plus top countries; free accounts get the period total and an 'upgrade' " +
+      "offer. 'days' is 1 to 90 (default 30).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        ...labelProp,
+        ...domainProp,
+        days: { type: "integer", minimum: 1, maximum: 90, description: "How many days back to count (default 30)." },
+      },
+      required: ["label"],
+    },
+    call: (cfg, a) => {
+      let p = resourcePath(a.label, "/visits", a.domain);
+      if (a.days) p += (p.includes("?") ? "&" : "?") + "days=" + encodeURIComponent(String(a.days));
+      return request(cfg, "GET", p);
+    },
   },
 
   {
