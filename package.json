@@ -1,6 +1,6 @@
 {
   "name": "agentdomains-mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "mcpName": "io.github.tashfeenahmed/agentdomains-mcp",
   "description": "MCP server for AgentDomains \u2014 free domains for the websites and APIs AI agents build.",
   "license": "FSL-1.1-Apache-2.0",

@@ -48,6 +48,7 @@ export const ANNOTATIONS: Record<string, {
   attach_email: { title: "Attach an email", readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   claim_domain: { title: "Claim a domain", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   list_domains: { title: "List my domains", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  get_visits: { title: "Show visitor stats", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   get_domain: { title: "Show one domain", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   delete_domain: { title: "Delete a domain", readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
   add_dns_record: { title: "Add a DNS record", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
@@ -190,6 +191,27 @@ export const TOOLS: ToolDef[] = [
       required: ["label"],
     },
     call: (cfg, a) => request(cfg, "GET", resourcePath(a.label, "", a.domain)),
+  },
+  {
+    name: "get_visits",
+    description:
+      "Visitor stats for a name that has a forward or proxy (plain DNS records are not seen). Pro accounts get " +
+      "daily requests and page views plus top countries; free accounts get the period total and an 'upgrade' " +
+      "offer. 'days' is 1 to 90 (default 30).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        ...labelProp,
+        ...domainProp,
+        days: { type: "integer", minimum: 1, maximum: 90, description: "How many days back to count (default 30)." },
+      },
+      required: ["label"],
+    },
+    call: (cfg, a) => {
+      let p = resourcePath(a.label, "/visits", a.domain);
+      if (a.days) p += (p.includes("?") ? "&" : "?") + "days=" + encodeURIComponent(String(a.days));
+      return request(cfg, "GET", p);
+    },
   },
 
   {
